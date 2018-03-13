@@ -278,7 +278,27 @@ describe('POST /users/login', () => {
         }
 
         User.findById(users[1]._id).then((user) => {
-          expect(user.tokens[0]).length.to.not.exist;
+          expect(user.tokens.length).to.equal(0);
+          done();
+        }).catch((e) => done(e));
+      });
+  });
+});
+
+describe('DELETE /users/me/token', () => {
+  it('should remove auth token on logout', (done) => {
+    request(app)
+      .delete('/users/me/token')
+      .set('x-auth', users[0].tokens[0].token)
+      .send()
+      .expect(200)
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        User.findById(users[0]._id).then((user) => {
+          expect(user.tokens.length).to.equal(0);
           done();
         }).catch((e) => done(e));
       });
