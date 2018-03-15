@@ -16,7 +16,7 @@ var UserSchema = new mongoose.Schema({
       message: '{VALUE} is not a valid email'
     }
   },
-  password: { // TODO: change from plaintext
+  password: {
     type: String,
     required: true,
     minlength: 6
@@ -44,8 +44,7 @@ UserSchema.methods.generateAuthToken = function() {
   var user = this;
   var access = 'auth';
 
-// TODO: move salt gen to config file
-  var token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123');
+  var token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET);
 
   user.tokens = user.tokens.concat([{access, token}]);
 
@@ -69,7 +68,7 @@ UserSchema.statics.findByToken = function(token) {
   var decoded;
 
   try {
-    decoded = jwt.verify(token, 'abc123');
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
   } catch (e) {
     return Promise.reject();
   }
